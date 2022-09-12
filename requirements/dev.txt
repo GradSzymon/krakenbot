@@ -1,0 +1,5 @@
+black==22.6.0
+mypy==0.910
+flake8==4.0.1
+ipykernel==6.15.2
+pandas==1.4.3
