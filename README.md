@@ -17,5 +17,5 @@ python run_bot.py --db_name=test.db --table_name=recent --batch_size=3 --duratio
 
 ### In case of problems with finding the krakenbot module just run the following command.
 ```console
-python -c "import sys; path = 'C:/Users/szgrad/repos/krakenbot/'; sys.path.append(path)"
+python -c "import sys; path = os.getenv('KRAKENBOTPATH'); sys.path.append(path)"
 ```
