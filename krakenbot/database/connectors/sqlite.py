@@ -26,10 +26,10 @@ class SQLiteConnector:
             self.connected = False
 
     def execute(self, query: str, data: Sequence[Any] = [], autoclose: bool = True) -> Optional[Sequence[Any]]:
-        """_summary_
+        """Execute SQL query for the connected database.
 
         Args:
-            query (str): SQL query to be executed for the given database
+            query (str): SQL query to be executed for the given database.
             data (Sequence[Any], optional): Data for the query (e.g. inserted values). Defaults to [].
             autoclose (bool, optional): Autoclose database connection. Defaults to True.
 

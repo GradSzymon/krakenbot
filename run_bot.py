@@ -17,12 +17,12 @@ logging.basicConfig(format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(messa
 
 def run_bot(api_url: str, db_name: str, table_name: str, batch_size: int, pair: str, duration: float, interval: float) -> None:
     connector = SQLiteConnector(db_name=db_name)
-    bot = KrakenBot(db_connector=connector, api_url=api_url)
+    bot = KrakenBot(db_connector=connector)
     columns = ['"pair name"', 'price', 'volume', 'time', '"buy(b)/sell(s)"', '"market(m)/limit(l)"', 'miscellaneous']
     columns_names = " ,".join(columns)
     bot.db_connector.execute(f'create table if not exists {table_name}  ("trade_id" integer primary key autoincrement, {columns_names})')
     loop = asyncio.get_event_loop()
-    bot.repeat_action(action_name='update_recent_trades', event_loop=loop, duration=duration, interval=interval, table_name=table_name, size=batch_size, pair=pair)
+    bot.repeat_action(action_name='update_recent_trades', event_loop=loop, duration=duration, interval=interval, table_name=table_name, api_url=api_url, size=batch_size, pair=pair)
 
 
 if __name__ == '__main__':

@@ -4,7 +4,6 @@ import logging
 from typing import Callable, Dict, Optional
 
 import requests
-from requests.exceptions import HTTPError
 
 from krakenbot.database.connectors.sqlite import SQLiteConnector
 
@@ -12,38 +11,46 @@ LOGGER = logging.getLogger(__name__)
 
 
 class KrakenBot:
-    def __init__(self, db_connector: SQLiteConnector, api_url: str = "https://api.kraken.com") -> None:
-        self.api_url = api_url
+    def __init__(self, db_connector: SQLiteConnector) -> None:
         self.db_connector = db_connector
         self.actions: Dict[str, Callable] = {
             "recent_trades": self.recent_trades,
             "update_recent_trades": self.update_recent_trades,
         }
 
-    def recent_trades(self, size: int = 1000, pair: str = "XBTUSD") -> dict:
-        """Return the last n trades (1000 by default).
+    def recent_trades(self, api_url: str = "https://api.kraken.com", size: int = 1000, pair: str = "XBTUSD") -> dict:
+        """Return the last n trades (1000 by default) for a given tradable asset pair.
 
         Args:
             size (int): The batch size of trades.
+            pair (str): The name of tradable asset pair.
 
         Returns:
             dict: Dict containing the last n trades for a given tradable asset pair.
         """
-
+        response_dict = {f"{pair}": None, "status": None, "error": ""}
         try:
-            response = requests.get(f"{self.api_url}/0/public/Trades?pair={pair}").json()
-            error = response["error"]
-            if error:
-                return error
-            result = response["result"]
-            pair_name = list(result.keys())[0]
-            trades = result[pair_name][0:size]
-            return {f"{pair}": trades}
+            response = requests.get(f"{api_url}/0/public/Trades?pair={pair}")
+        except requests.exceptions.ConnectionError as connection_error:
+            response_dict["error"] = "Connection refused by the server"
+            LOGGER.error(f"The connection error occured: {connection_error}")
+            return response_dict
 
-        except HTTPError:
-            error = HTTPError("HTTP error occured")
-            LOGGER.error(f"HTTP error occured: {error}")
-            raise error
+        status_code = response.status_code
+        json_response = response.json()
+        if json_response["error"]:
+            response_dict["error"] = " ".join(json_response["error"])
+        response_dict["status"] = status_code
+
+        if status_code != 200:
+            LOGGER.error(f"Bad response status code: {status_code}")
+            return response_dict
+
+        result = json_response["result"]
+        pair_name = list(result.keys())[0]
+        trades = result[pair_name][0:size]
+        response_dict[f"{pair}"] = trades
+        return response_dict
 
     def update_recent_trades(self, table_name: str, size: int = 1000, pair: str = "XBTUSD") -> None:
         """Update the table with recent trades
