@@ -7,8 +7,8 @@ The kraken trading bot that can access public REST API endpoint of kraken.com cr
 - [x] fetches the latest batch of transactions
 - [x] saves transactions to a database table
 - [x] repeats this action every 10 seconds for an hour
-- [ ] write unit tests
-- [ ] handle API errors relevant for the public endpoint
+- [x] write unit tests
+- [x] handle API errors relevant for the public endpoint
 
 ### Script execution example (windows)
 ```console
